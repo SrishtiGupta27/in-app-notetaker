@@ -1,11 +1,13 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import os
 import uuid
 import json
 from pathlib import Path
 from app.services.diarization import DiarizationService
 from app.services.privacy import PrivacyService
+from app.services.soap import generate_soap_note
 from app.config import settings
 
 app = FastAPI(title="Medical Note-Taking API")
@@ -13,6 +15,13 @@ app = FastAPI(title="Medical Note-Taking API")
 # Ensure upload directory exists
 Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
 Path(settings.results_dir).mkdir(parents=True, exist_ok=True)
+
+# Bypass localtunnel's browser confirmation page for external services like pyannote.ai
+@app.middleware("http")
+async def bypass_localtunnel(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["bypass-tunnel-reminder"] = "true"
+    return response
 
 # Serve uploaded files statically (for local testing only)
 app.mount("/files", StaticFiles(directory=settings.upload_dir), name="files")
@@ -24,9 +33,9 @@ def root():
         "docs": "/docs",
         "endpoints": {
             "upload": "POST /upload-and-process-local",
-            "process": "POST /process-url",
             "status": "GET /session/{session_id}",
-            "set_roles": "POST /set-speaker-roles/{session_id}",
+            "speakers": "GET /session/{session_id}/speakers",
+            "soap": "GET /session/{session_id}/soap",
             "health": "GET /health"
         }
     }
@@ -35,26 +44,44 @@ def root():
 async def upload_and_process_local(file: UploadFile = File(...)):
     """Upload and process audio file using tunnel service
     
-    Requires a tunnel service (LocalTunnel, ngrok, etc.) to make local files public.
+    Requires a tunnel service (LocalTunnel) to make local files public.
     In production, use cloud storage (S3, GCS, etc.)
     """
+    
+    # Validate file type and provide recommendations
+    allowed_extensions = {'.wav', '.mp3', '.m4a', '.ogg', '.flac', '.webm'}
+    file_extension = os.path.splitext(file.filename)[1].lower()
+    
+    if file_extension not in allowed_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Unsupported file format. Supported: {', '.join(allowed_extensions)}"
+        )
+    
+    # Check file size (pyannote.ai limit is 1GB)
+    content = await file.read()
+    file_size_mb = len(content) / (1024 * 1024)
+    
+    if file_size_mb > 1000:  # 1GB limit
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large ({file_size_mb:.1f}MB). Maximum size is 1GB."
+        )
     
     # Generate unique session ID
     session_id = str(uuid.uuid4())
     
     # Save file securely
-    file_extension = os.path.splitext(file.filename)[1]
     audio_filename = f"{session_id}{file_extension}"
     audio_path = os.path.join(settings.upload_dir, audio_filename)
     
     with open(audio_path, "wb") as buffer:
-        content = await file.read()
         buffer.write(content)
     
     # Create public URL using tunnel service (LocalTunnel)
     audio_url = f"{settings.public_url}/files/{audio_filename}"
     
-    # Start diarization
+    # Start diarization with medical optimization
     diarization_service = DiarizationService()
     job_id = diarization_service.start_diarization(audio_url)
     
@@ -81,13 +108,12 @@ async def upload_and_process_local(file: UploadFile = File(...)):
         "check_status": f"GET /session/{session_id}?poll=true"
     }
 
-@app.post("/set-speaker-roles/{session_id}")
-def set_speaker_roles(session_id: str, doctor_speaker: str):
-    """Set which speaker is the doctor for a session
+@app.get("/session/{session_id}/speakers")
+def get_session_speakers(session_id: str):
+    """Get available speakers for role assignment
     
     Args:
         session_id: The session ID
-        doctor_speaker: Which speaker is the doctor ("Speaker 00" or "Speaker 01")
     """
     
     session_file = os.path.join(settings.results_dir, f"{session_id}.json")
@@ -101,54 +127,20 @@ def set_speaker_roles(session_id: str, doctor_speaker: str):
     if not session_data.get("result"):
         raise HTTPException(status_code=400, detail="Session not completed yet")
     
-    # Re-format transcript with correct speaker assignment
-    session_data["doctor_speaker"] = doctor_speaker
-    
-    with open(session_file, "w") as f:
-        json.dump(session_data, f)
+    # Get unique speakers from transcript
+    speakers = set()
+    for segment in session_data["result"]["transcript"]:
+        speaker = segment.get("speaker", "Unknown")
+        speakers.add(speaker)
     
     return {
         "session_id": session_id,
-        "doctor_speaker": doctor_speaker,
-        "message": "Speaker roles updated successfully"
+        "available_speakers": list(speakers),
+        "current_assignment": session_data.get("doctor_speaker"),
+        "message": "Use POST /set-speaker-roles/{session_id} to assign roles"
     }
 
-@app.post("/process-url")
-def process_audio_url(audio_url: str):
-    """Process diarization directly from a URL (for testing)
-    
-    Args:
-        audio_url: Public URL where pyannote.ai can access the audio file
-                   Example: https://files.pyannote.ai/marklex1min.wav
-    """
-    
-    # Generate unique session ID
-    session_id = str(uuid.uuid4())
-    
-    diarization_service = DiarizationService()
-    
-    # Start diarization
-    job_id = diarization_service.start_diarization(audio_url)
-    
-    if not job_id:
-        raise HTTPException(status_code=500, detail="Failed to start diarization")
-    
-    # Save session
-    session_file = os.path.join(settings.results_dir, f"{session_id}.json")
-    with open(session_file, "w") as f:
-        json.dump({
-            "session_id": session_id,
-            "job_id": job_id,
-            "status": "processing",
-            "audio_url": audio_url
-        }, f)
-    
-    return {
-        "session_id": session_id,
-        "job_id": job_id,
-        "status": "processing",
-        "message": "Diarization started. Use /session/{session_id} to check status."
-    }
+
 
 @app.get("/session/{session_id}")
 def get_session_status(session_id: str, poll: bool = False):
@@ -323,37 +315,36 @@ def format_transcript(result_data: dict, doctor_speaker: str = None) -> dict:
     Args:
         result_data: The diarization result
         doctor_speaker: Which speaker is the doctor (e.g., "Speaker 00" or "Speaker 01")
-                       If None, uses default assumption
+                       If None, leaves speakers unlabeled for manual assignment
     """
     
     if not result_data or "transcript" not in result_data:
         return {}
     
-    # Default assumption (may be wrong for different conversations)
-    default_mapping = {
-        "Speaker 00": "Patient",
-        "Speaker 01": "Doctor",
-        "Speaker 0": "Patient", 
-        "Speaker 1": "Doctor"
-    }
+    # Get all unique speakers from the transcript
+    speakers_in_transcript = set()
+    for segment in result_data["transcript"]:
+        speaker = segment.get("speaker", "Unknown")
+        speakers_in_transcript.add(speaker)
     
-    # If doctor_speaker is specified, create custom mapping
-    if doctor_speaker:
-        if doctor_speaker in ["Speaker 00", "Speaker 0"]:
-            mapping = {
-                "Speaker 00": "Doctor",
-                "Speaker 01": "Patient", 
-                "Speaker 0": "Doctor",
-                "Speaker 1": "Patient"
-            }
-        else:
-            mapping = default_mapping
+    # Create mapping based on doctor_speaker assignment
+    mapping = {}
+    if doctor_speaker and doctor_speaker in speakers_in_transcript:
+        # Assign roles based on user's choice
+        for speaker in speakers_in_transcript:
+            if speaker == doctor_speaker:
+                mapping[speaker] = "Doctor"
+            else:
+                mapping[speaker] = "Patient"
     else:
-        mapping = default_mapping
+        # No assignment - leave as generic speaker labels
+        for speaker in speakers_in_transcript:
+            mapping[speaker] = speaker  # Keep original speaker ID
     
     formatted = {
         "speakers": mapping,
-        "segments": []
+        "segments": [],
+        "needs_role_assignment": doctor_speaker is None  # Flag to indicate manual assignment needed
     }
     
     for segment in result_data["transcript"]:
@@ -369,6 +360,38 @@ def format_transcript(result_data: dict, doctor_speaker: str = None) -> dict:
         })
     
     return formatted
+
+@app.get("/session/{session_id}/soap")
+def get_soap_note(session_id: str):
+    """Generate a SOAP note from the session transcript using OpenAI"""
+
+    session_file = os.path.join(settings.results_dir, f"{session_id}.json")
+
+    if not os.path.exists(session_file):
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    with open(session_file, "r") as f:
+        session_data = json.load(f)
+
+    if session_data.get("status") != "succeeded":
+        raise HTTPException(status_code=400, detail="Session not completed yet")
+
+    transcript = session_data.get("result", {}).get("transcript", [])
+
+    if not transcript:
+        raise HTTPException(status_code=400, detail="No transcript available")
+
+    doctor_speaker = session_data.get("doctor_speaker")
+    formatted = format_transcript(session_data["result"], doctor_speaker)
+    segments = formatted.get("segments", [])
+
+    soap = generate_soap_note(segments)
+
+    return {
+        "session_id": session_id,
+        "soap": soap
+    }
+
 
 @app.get("/health")
 def health_check():

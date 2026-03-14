@@ -83,21 +83,71 @@ GET /session/{session_id}
 curl "http://localhost:8000/session/uuid-here"
 ```
 
-Response:
+Response (before role assignment):
 ```json
 {
   "session_id": "uuid-here",
   "status": "succeeded",
-  "created_at": "2026-03-13T10:00:00",
-  "updated_at": "2026-03-13T10:05:00",
   "transcript": {
     "speakers": {
-      "Speaker 0": "Doctor",
-      "Speaker 1": "Patient"
+      "Speaker 00": "Speaker 00",
+      "Speaker 01": "Speaker 01"
     },
     "segments": [
       {
-        "speaker": "Speaker 0",
+        "speaker": "Speaker 00",
+        "speaker_label": "Speaker 00",
+        "text": "How are you feeling today?",
+        "start": 0.5,
+        "end": 2.3
+      }
+    ],
+    "needs_role_assignment": true
+  }
+}
+```
+
+### Get Available Speakers
+```bash
+GET /session/{session_id}/speakers
+
+# Example:
+curl "http://localhost:8000/session/uuid-here/speakers"
+```
+
+Response:
+```json
+{
+  "session_id": "uuid-here",
+  "available_speakers": ["Speaker 00", "Speaker 01"],
+  "current_assignment": null,
+  "message": "Use POST /set-speaker-roles/{session_id} to assign roles"
+}
+```
+
+### Assign Speaker Roles
+```bash
+POST /set-speaker-roles/{session_id}
+Content-Type: application/json
+
+{
+  "doctor_speaker": "Speaker 01"
+}
+```
+
+Response after role assignment:
+```json
+{
+  "session_id": "uuid-here",
+  "status": "succeeded",
+  "transcript": {
+    "speakers": {
+      "Speaker 00": "Patient",
+      "Speaker 01": "Doctor"
+    },
+    "segments": [
+      {
+        "speaker": "Speaker 01",
         "speaker_label": "Doctor",
         "text": "How are you feeling today?",
         "start": 0.5,
@@ -107,6 +157,34 @@ Response:
   }
 }
 ```
+
+## Frontend Integration
+
+### React/Next.js Audio Recording
+
+FFmpeg won't work directly in React/Next.js browsers. Use these alternatives:
+
+1. **MediaRecorder API** (Recommended)
+   ```javascript
+   const stream = await navigator.mediaDevices.getUserMedia({ 
+     audio: { sampleRate: 16000, channelCount: 1 } 
+   });
+   const recorder = new MediaRecorder(stream);
+   ```
+
+2. **FFmpeg.wasm** - WebAssembly version for browsers
+3. **Server-side processing** - Send audio to backend
+
+See `frontend-example.md` for complete React/Next.js implementation.
+
+## Workflow
+
+1. **Record Audio** → Browser MediaRecorder or upload file
+2. **Upload** → `POST /upload-and-process-local`
+3. **Process** → Pyannote.ai diarization + transcription
+4. **Check Status** → `GET /session/{id}` (returns generic speaker labels)
+5. **Assign Roles** → `POST /set-speaker-roles/{id}` (specify which speaker is doctor)
+6. **Get Final Transcript** → `GET /session/{id}` (returns labeled transcript)
 
 ## Security & Compliance
 

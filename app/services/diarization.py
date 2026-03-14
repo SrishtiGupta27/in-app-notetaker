@@ -13,10 +13,16 @@ class DiarizationService:
         }
     
     def start_diarization(self, audio_url: str) -> Optional[str]:
-        """Start diarization job with transcription enabled"""
+        """Start diarization job with Whisper transcription (supports Hindi)"""
         data = {
             "url": audio_url,
-            "transcription": True
+            "model": "precision-2",
+            "transcription": True,
+            "transcriptionConfig": {
+                "model": "faster-whisper-large-v3-turbo"
+            },
+            "minSpeakers": 2,
+            "maxSpeakers": 3
         }
         
         print(f"Starting diarization for: {audio_url}")
@@ -66,7 +72,9 @@ class DiarizationService:
             if status == "succeeded":
                 return result
             elif status == "failed":
-                return {"status": "failed", "error": result.get("error", "Unknown error")}
+                # pyannote returns error inside output.error
+                error_msg = result.get("error") or result.get("output", {}).get("error", "Unknown error")
+                return {"status": "failed", "error": error_msg}
             
             time.sleep(interval)
         
