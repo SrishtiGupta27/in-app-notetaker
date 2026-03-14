@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 import os
 import uuid
 import json
@@ -8,6 +8,7 @@ from pathlib import Path
 from app.services.diarization import DiarizationService
 from app.services.privacy import PrivacyService
 from app.services.soap import generate_soap_note
+from app.services.report import generate_pdf_report
 from app.config import settings
 
 app = FastAPI(title="Medical Note-Taking API")
@@ -36,6 +37,7 @@ def root():
             "status": "GET /session/{session_id}",
             "speakers": "GET /session/{session_id}/speakers",
             "soap": "GET /session/{session_id}/soap",
+            "report": "GET /session/{session_id}/report",
             "health": "GET /health"
         }
     }
@@ -391,6 +393,47 @@ def get_soap_note(session_id: str):
         "session_id": session_id,
         "soap": soap
     }
+
+
+@app.get("/session/{session_id}/report")
+def get_report(session_id: str):
+    """Generate and download a PDF medical report for the session"""
+
+    session_file = os.path.join(settings.results_dir, f"{session_id}.json")
+
+    if not os.path.exists(session_file):
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    with open(session_file, "r") as f:
+        session_data = json.load(f)
+
+    if session_data.get("status") != "succeeded":
+        raise HTTPException(status_code=400, detail="Session not completed yet")
+
+    # Get formatted transcript
+    doctor_speaker = session_data.get("doctor_speaker")
+    formatted = format_transcript(session_data["result"], doctor_speaker)
+    segments = formatted.get("segments", [])
+
+    # Generate SOAP note
+    soap = None
+    if segments:
+        soap = generate_soap_note(segments)
+
+    # Generate PDF
+    pdf_bytes = generate_pdf_report(
+        session_id=session_id,
+        filename=session_data.get("filename", "N/A"),
+        status=session_data["status"],
+        transcript=segments,
+        soap=soap,
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=report_{session_id}.pdf"}
+    )
 
 
 @app.get("/health")
