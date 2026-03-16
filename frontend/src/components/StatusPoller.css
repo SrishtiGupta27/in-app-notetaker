@@ -1,0 +1,60 @@
+.status-poller {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.status-poller h3 {
+  margin: 1rem 0 0.5rem;
+  color: #2c3e50;
+}
+
+.status-poller p {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+.status-poller.processing {
+  border-left: 4px solid #3498db;
+}
+
+.status-poller.success {
+  border-left: 4px solid #27ae60;
+}
+
+.status-poller.error {
+  border-left: 4px solid #e74c3c;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  border: 4px solid #ecf0f1;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.status-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.session-id {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: #ecf0f1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  font-family: monospace;
+}

@@ -1,0 +1,170 @@
+.clinical-note {
+  background: #fafbfc;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.clinical-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e8ecef;
+}
+
+.btn-copy-all {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+}
+
+.btn-copy-all:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.clinical-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.clinical-section {
+  background: white;
+  border-bottom: 1px solid #e8ecef;
+  padding: 1.5rem;
+  transition: all 0.2s;
+}
+
+.clinical-section:last-child {
+  border-bottom: none;
+}
+
+.clinical-section:hover {
+  background: #fafbfc;
+}
+
+.section-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.section-header-inline h4 {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-copy-small {
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #9ca3af;
+}
+
+.btn-copy-small:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+
+.section-content-editable {
+  padding: 0;
+}
+
+.section-content-editable p {
+  color: #1f2937;
+  line-height: 1.7;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.empty-content {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.labs-section {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.labs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.lab-card {
+  background: white;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 1rem;
+  transition: all 0.2s;
+}
+
+.lab-card:hover {
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  border-color: #93c5fd;
+}
+
+.lab-name {
+  font-weight: 600;
+  color: #1e40af;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.lab-reason {
+  color: #4b5563;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.quality-feedback {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8ecef;
+  text-align: center;
+}
+
+.quality-feedback p {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: all 0.2s;
+}
+
+.star-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}

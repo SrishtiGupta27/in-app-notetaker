@@ -4,23 +4,31 @@ from app.config import settings
 
 client = OpenAI(api_key=settings.openai_api_key)
 
-SOAP_PROMPT = """You are an experienced medical scribe. Given the following doctor-patient conversation transcript, generate a detailed SOAP note.
+SOAP_PROMPT = """You are an experienced medical scribe. Given the following doctor-patient conversation transcript, generate a detailed clinical note.
 
 Transcript:
 {transcript}
 
-Return the SOAP note in this exact JSON format:
+Return the clinical note in this exact JSON format:
 {{
-  "subjective": "Detailed paragraph covering the patient's chief complaint, description of symptoms (onset, duration, severity, location, aggravating/relieving factors), relevant past medical history, current medications, allergies, and any social or family history mentioned.",
-  "objective": "Detailed paragraph covering all clinical observations made by the doctor including vital signs, physical examination findings, and any diagnostic results or test findings discussed.",
-  "assessment": "Detailed paragraph covering the doctor's diagnosis or clinical impression, reasoning behind it, any differential diagnoses considered, and the severity or stage of the condition if mentioned.",
-  "plan": "Detailed paragraph covering all prescribed medications with dosages, investigations or tests ordered, specialist referrals, lifestyle and dietary advice, patient education provided, and follow-up instructions."
+  "chief_complaint": "Brief statement of the patient's main concern or reason for visit.",
+  "history_present_illness": "Detailed paragraph covering the patient's description of symptoms (onset, duration, severity, location, aggravating/relieving factors), progression of the condition, and any relevant context.",
+  "assessment_plan": "Detailed paragraph covering the doctor's clinical observations, physical examination findings, vital signs if mentioned, clinical impression, primary diagnosis, differential diagnoses considered, prescribed medications with dosages, investigations ordered, specialist referrals, lifestyle modifications, and follow-up instructions.",
+  "review_systems": "Brief paragraph covering any systematic review mentioned (cardiovascular, respiratory, gastrointestinal, etc.). Set to null if not discussed.",
+  "recommended_labs": [
+    {{
+      "test_name": "Name of the lab test",
+      "reason": "Clinical reasoning for ordering this test based on symptoms/diagnosis"
+    }}
+  ]
 }}
 
 Rules:
 - Only include information explicitly mentioned in the transcript
-- Do not infer, fabricate, or assume any clinical details
-- If a section has no relevant information, set it to null
+- For recommended_labs, suggest appropriate tests based on the symptoms and diagnosis discussed
+- If symptoms suggest specific conditions, recommend relevant diagnostic tests (e.g., HbA1c for diabetes, lipid panel for cardiovascular risk, CBC for infection)
+- Do not infer, fabricate, or assume clinical details beyond reasonable clinical judgment
+- If a section has no relevant information, set it to null or empty array for labs
 - Write each section as a coherent clinical paragraph, not bullet points
 - Use proper medical terminology"""
 
@@ -37,11 +45,11 @@ def format_transcript_for_llm(segments: List[Dict]) -> str:
 
 
 def generate_soap_note(segments: List[Dict]) -> Dict:
-    """Generate a detailed SOAP note from transcript segments using OpenAI"""
+    """Generate a detailed clinical note from transcript segments using OpenAI"""
     transcript_text = format_transcript_for_llm(segments)
 
     if not transcript_text:
-        return {"error": "Empty transcript, cannot generate SOAP note"}
+        return {"error": "Empty transcript, cannot generate clinical note"}
 
     response = client.chat.completions.create(
         model="gpt-4o",

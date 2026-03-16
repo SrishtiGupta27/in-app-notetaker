@@ -219,3 +219,5 @@ ffmpeg -f alsa -i default -ar 16000 -ac 1 -t 300 medical_note.wav
 
 ##Local-tunnel
 lt --port 8000 --subdomain mymedicalapp
+
+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

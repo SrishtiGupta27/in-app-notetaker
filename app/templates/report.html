@@ -144,40 +144,51 @@
     </div>
   </div>
 
-  <!-- SOAP Note -->
+  <!-- Clinical Note -->
   {% if soap %}
   <div class="section">
-    <div class="section-title">SOAP Note</div>
+    <div class="section-title">Clinical Note</div>
     <div class="soap-grid">
       <div class="soap-item">
-        <div class="soap-label">S — Subjective</div>
+        <div class="soap-label">Chief Complaint</div>
         <div class="soap-content">
-          {% if soap.subjective %} {{ soap.subjective }}
-          {% else %}<span class="soap-null">No subjective information available</span>{% endif %}
+          {% if soap.chief_complaint %} {{ soap.chief_complaint }}
+          {% else %}<span class="soap-null">No chief complaint documented</span>{% endif %}
         </div>
       </div>
       <div class="soap-item">
-        <div class="soap-label">O — Objective</div>
+        <div class="soap-label">History of Present Illness</div>
         <div class="soap-content">
-          {% if soap.objective %} {{ soap.objective }}
-          {% else %}<span class="soap-null">No objective information available</span>{% endif %}
+          {% if soap.history_present_illness %} {{ soap.history_present_illness }}
+          {% else %}<span class="soap-null">No history documented</span>{% endif %}
         </div>
       </div>
       <div class="soap-item">
-        <div class="soap-label">A — Assessment</div>
+        <div class="soap-label">Assessment & Plan</div>
         <div class="soap-content">
-          {% if soap.assessment %} {{ soap.assessment }}
+          {% if soap.assessment_plan %} {{ soap.assessment_plan }}
           {% else %}<span class="soap-null">No assessment available</span>{% endif %}
         </div>
       </div>
+      {% if soap.review_systems %}
       <div class="soap-item">
-        <div class="soap-label">P — Plan</div>
-        <div class="soap-content">
-          {% if soap.plan %} {{ soap.plan }}
-          {% else %}<span class="soap-null">No plan available</span>{% endif %}
-        </div>
+        <div class="soap-label">Review of Systems</div>
+        <div class="soap-content">{{ soap.review_systems }}</div>
       </div>
+      {% endif %}
     </div>
+    
+    {% if soap.recommended_labs and soap.recommended_labs|length > 0 %}
+    <div style="margin-top: 16px;">
+      <div class="soap-label" style="margin-bottom: 8px;">Recommended Lab Tests</div>
+      {% for lab in soap.recommended_labs %}
+      <div style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 8px 12px; margin-bottom: 8px; border-radius: 4px;">
+        <strong style="color: #1e40af;">{{ lab.test_name }}</strong><br>
+        <span style="font-size: 11px; color: #4b5563;">{{ lab.reason }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 
