@@ -1,61 +1,55 @@
 import { useState } from 'react';
 import ClinicalNote from './ClinicalNote';
 import TranscriptView from './TranscriptView';
+import Noteworthy from './Noteworthy';
+import AudioPlayer from './AudioPlayer';
 import './Dashboard.css';
 
-function Dashboard({ sessionId, filename, transcript, soap, onDownloadReport, onReset }) {
-  const [activeTab, setActiveTab] = useState('clinical');
+function Dashboard({ sessionId, filename, transcript, soap, audioUrl, onDownloadReport, onReset }) {
+  const [rightPaneTab, setRightPaneTab] = useState('transcript');
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div className="patient-info">
-          <div className="avatar">👤</div>
-          <div className="patient-details">
-            <h2>Medical Consultation</h2>
-            <p className="session-meta">Session: {sessionId.slice(0, 8)}... • File: {filename}</p>
+    <div className="dashboard-wrapper">
+      <div className="dashboard-container">
+        {/* Left Pane - Clinical Note */}
+        <div className="left-pane">
+          <div className="clinical-note-container">
+            {soap && <ClinicalNote soap={soap} />}
           </div>
         </div>
-        <div className="dashboard-actions">
-          <button onClick={onDownloadReport} className="btn-download">
-            📄 Download Report
-          </button>
-          <button onClick={onReset} className="btn-new">
-            ➕ New Session
-          </button>
+
+        {/* Right Pane - Transcript & Noteworthy */}
+        <div className="right-pane">
+          <div className="right-pane-header">
+            <div className="right-pane-tabs">
+              <button
+                className={`right-tab ${rightPaneTab === 'transcript' ? 'active' : ''}`}
+                onClick={() => setRightPaneTab('transcript')}
+              >
+                Transcript
+              </button>
+              <button
+                className={`right-tab ${rightPaneTab === 'noteworthy' ? 'active' : ''}`}
+                onClick={() => setRightPaneTab('noteworthy')}
+              >
+                Noteworthy
+              </button>
+            </div>
+          </div>
+          
+          <div className="right-pane-content">
+            {rightPaneTab === 'transcript' && transcript && (
+              <TranscriptView transcript={transcript} />
+            )}
+            {rightPaneTab === 'noteworthy' && soap && (
+              <Noteworthy soap={soap} />
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="dashboard-tabs">
-        <button
-          className={`tab ${activeTab === 'clinical' ? 'active' : ''}`}
-          onClick={() => setActiveTab('clinical')}
-        >
-          Clinical Note
-        </button>
-        <button
-          className={`tab ${activeTab === 'transcript' ? 'active' : ''}`}
-          onClick={() => setActiveTab('transcript')}
-        >
-          Transcript
-        </button>
-        <button
-          className={`tab ${activeTab === 'noteworthy' ? 'active' : ''}`}
-          onClick={() => setActiveTab('noteworthy')}
-        >
-          Noteworthy
-        </button>
-      </div>
-
-      <div className="dashboard-content">
-        {activeTab === 'clinical' && soap && <ClinicalNote soap={soap} />}
-        {activeTab === 'transcript' && transcript && <TranscriptView transcript={transcript} />}
-        {activeTab === 'noteworthy' && (
-          <div className="noteworthy-placeholder">
-            <p>Key insights and important points will appear here</p>
-          </div>
-        )}
-      </div>
+      {/* Fixed Audio Player at Bottom */}
+      {audioUrl && <AudioPlayer audioUrl={audioUrl} />}
     </div>
   );
 }

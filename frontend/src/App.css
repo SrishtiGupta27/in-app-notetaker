@@ -1,83 +1,281 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(0, 128, 128, 0.4) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(70, 130, 180, 0.4) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(32, 178, 170, 0.2) 0%, transparent 60%),
+    linear-gradient(135deg, #004d4d 0%, #006666 15%, #008080 30%, #20b2aa 45%, #4682b4 60%, #5f9ea0 75%, #87ceeb 90%, #b0e0e6 100%);
+  background-attachment: fixed;
+  color: #1f2937;
+  min-height: 100vh;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.03) 1px,
+      rgba(255, 255, 255, 0.03) 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.03) 1px,
+      rgba(255, 255, 255, 0.03) 2px
+    );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse at center, transparent 30%, rgba(0, 77, 77, 0.1) 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: transparent;
+  position: relative;
+  z-index: 2;
 }
 
 .app-header {
-  background: linear-gradient(135deg, #1a5276 0%, #2874a6 100%);
-  color: white;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  box-shadow: 
+    0 4px 20px rgba(15, 76, 117, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .app-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
 }
 
 .app-header p {
-  opacity: 0.9;
-  font-size: 0.95rem;
+  display: none;
+}
+
+.doctor-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.doctor-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1A73E8 0%, #4285f4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.doctor-name {
+  font-weight: 500;
+  color: #374151;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.btn-complete {
+  background: #1A73E8;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-complete:hover {
+  background: #1557b0;
+}
+
+.btn-secondary {
+  background: #f9fafb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .app-main {
   flex: 1;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: calc(100vh - 120px);
+  padding-bottom: 70px; /* Account for audio player */
 }
 
 .app-footer {
   background: #2c3e50;
   color: #ecf0f1;
   text-align: center;
-  padding: 1rem;
-  font-size: 0.85rem;
+  padding: 0.75rem;
+  font-size: 0.8rem;
 }
 
-.actions-bar {
+/* Audio Player Fixed Bottom Dock */
+.audio-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
+  align-items: center;
+  padding: 0 2rem;
+  z-index: 50;
+  box-shadow: 
+    0 -4px 20px rgba(15, 76, 117, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-.btn-primary, .btn-secondary {
-  padding: 0.75rem 1.5rem;
+.audio-player-custom {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.play-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #1A73E8;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.play-button:hover {
+  background: #1557b0;
+  transform: scale(1.05);
+}
+
+.audio-progress {
+  flex: 1;
+  height: 6px;
+  background: #E0E0E0;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.audio-progress-fill {
+  height: 100%;
+  background: #1A73E8;
+  border-radius: 3px;
+  transition: width 0.1s;
+}
+
+.audio-time {
+  font-size: 0.875rem;
+  color: #6b7280;
+  min-width: 50px;
+  text-align: center;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+  .app-main {
+    flex-direction: column;
+  }
+  
+  .app-header {
+    padding: 1rem;
+  }
+}
 .btn-primary {
-  background: #1a5276;
+  background: #1A73E8;
   color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.btn-primary:hover {
-  background: #154360;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26, 82, 118, 0.3);
+.btn-primary:hover:not(:disabled) {
+  background: #1557b0;
 }
 
 .btn-primary:disabled {
-  background: #95a5a6;
+  background: #9ca3af;
   cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  background: #ecf0f1;
-  color: #2c3e50;
-  border: 1px solid #bdc3c7;
-}
-
-.btn-secondary:hover {
-  background: #bdc3c7;
 }

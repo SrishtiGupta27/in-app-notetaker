@@ -1,92 +1,77 @@
-.dashboard {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  overflow: hidden;
+.dashboard-wrapper {
+  width: 100%;
+  height: 100%;
+  background: transparent;
 }
 
-.dashboard-header {
+.dashboard-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
+  width: 100%;
+  height: calc(100vh - 190px); /* Account for header + audio player */
+  background: transparent;
+}
+
+.left-pane {
+  width: 65%;
+  min-width: 65%;
+  max-width: 65%;
+  flex-shrink: 0;
+  background: transparent;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.left-pane::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-pane::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.left-pane::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.clinical-note-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.right-pane {
+  width: 35%;
+  min-width: 35%;
+  max-width: 35%;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(229, 231, 235, 0.3);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.right-pane-header {
+  padding: 1rem 1.5rem 0;
+  border-bottom: 1px solid rgba(243, 244, 246, 0.5);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.right-pane-tabs {
+  display: flex;
+  gap: 0;
   border-bottom: 1px solid #e5e7eb;
-  background: white;
 }
 
-.patient-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-}
-
-.patient-details h2 {
-  font-size: 1rem;
-  color: #1f2937;
-  margin-bottom: 0.125rem;
-  font-weight: 600;
-}
-
-.session-meta {
-  font-size: 0.8rem;
-  color: #9ca3af;
-}
-
-.dashboard-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn-download, .btn-new {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-download {
-  background: #ff6b35;
-  color: white;
-}
-
-.btn-download:hover {
-  background: #e55a2b;
-}
-
-.btn-new {
-  background: white;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
-}
-
-.btn-new:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.dashboard-tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fafbfc;
-  padding: 0 1.5rem;
-}
-
-.tab {
-  padding: 0.875rem 1.5rem;
+.right-tab {
+  padding: 0.75rem 1rem;
   border: none;
   background: transparent;
   color: #6b7280;
@@ -95,31 +80,73 @@
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
-  position: relative;
-  top: 1px;
 }
 
-.tab:hover {
-  color: #1f2937;
+.right-tab:hover {
+  color: #374151;
 }
 
-.tab.active {
-  color: #1f2937;
-  border-bottom-color: #ff6b35;
-  background: white;
+.right-tab.active {
+  color: #1A73E8;
+  border-bottom-color: #1A73E8;
 }
 
-.dashboard-content {
-  padding: 0;
-  min-height: 400px;
-  background: white;
+.right-pane-content {
+  flex: 1;
+  overflow-y: auto;
+  background: transparent;
 }
 
-.noteworthy-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  color: #95a5a6;
-  font-style: italic;
+.right-pane-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.right-pane-content::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+.right-pane-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .left-pane {
+    width: 60%;
+    min-width: 60%;
+    max-width: 60%;
+  }
+  
+  .right-pane {
+    width: 40%;
+    min-width: 40%;
+    max-width: 40%;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .left-pane,
+  .right-pane {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    flex: none;
+    height: auto;
+  }
+  
+  .left-pane {
+    padding: 1rem;
+  }
+  
+  .right-pane {
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+    min-height: 400px;
+  }
 }

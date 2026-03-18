@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import './AudioRecorder.css';
+import './RecordingState.css';
 
-function AudioRecorder({ onRecordingComplete }) {
+function RecordingState({ onRecordingComplete }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [error, setError] = useState(null);
@@ -33,7 +33,7 @@ function AudioRecorder({ onRecordingComplete }) {
       const updateWaveform = () => {
         if (analyserRef.current) {
           analyserRef.current.analyser.getByteFrequencyData(analyserRef.current.dataArray);
-          const levels = Array.from(analyserRef.current.dataArray.slice(0, 20)).map(value => value / 255);
+          const levels = Array.from(analyserRef.current.dataArray.slice(0, 24)).map(value => value / 255);
           setAudioLevels(levels);
           animationRef.current = requestAnimationFrame(updateWaveform);
         }
@@ -98,53 +98,66 @@ function AudioRecorder({ onRecordingComplete }) {
     };
   }, []);
 
-  return (
-    <div className="audio-recorder">
-      {error && <div className="recorder-error">{error}</div>}
-      
-      {!isRecording ? (
-        <button onClick={startRecording} className="btn-record">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-          </svg>
-          Start Recording
-        </button>
-      ) : (
-        <div className="recording-state">
-          <div className="recording-header">
-            <div className="recording-indicator">
-              <span className="pulse-dot"></span>
-              <span className="recording-text">Recording</span>
-            </div>
-            <div className="recording-timer">{formatTime(recordingTime)}</div>
-          </div>
-          
-          <div className="waveform-container">
-            <div className="waveform">
-              {audioLevels.map((level, index) => (
-                <div
-                  key={index}
-                  className="waveform-bar"
-                  style={{
-                    height: `${Math.max(level * 100, 4)}%`,
-                    animationDelay: `${index * 0.1}s`
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          
-          <button onClick={stopRecording} className="btn-stop">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 6h12v12H6z"/>
+  if (!isRecording) {
+    return (
+      <div className="recording-state-container">
+        <div className="recording-start-card">
+          <div className="recording-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
             </svg>
-            Stop Recording
+          </div>
+          <h3>Ready to Record</h3>
+          <p>Click the button below to start recording your medical consultation</p>
+          {error && <div className="recording-error">{error}</div>}
+          <button onClick={startRecording} className="btn-start-recording">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+            Start Recording
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="recording-state-container">
+      <div className="recording-active-card">
+        <div className="recording-header">
+          <div className="recording-indicator">
+            <span className="pulse-dot"></span>
+            <span className="recording-text">Recording</span>
+          </div>
+          <div className="recording-timer">{formatTime(recordingTime)}</div>
+        </div>
+        
+        <div className="waveform-container">
+          <div className="waveform">
+            {audioLevels.map((level, index) => (
+              <div
+                key={index}
+                className="waveform-bar"
+                style={{
+                  height: `${Math.max(level * 100, 8)}%`,
+                  animationDelay: `${index * 0.05}s`
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        
+        <button onClick={stopRecording} className="btn-stop-recording">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h12v12H6z"/>
+          </svg>
+          Stop Recording
+        </button>
+      </div>
     </div>
   );
 }
 
-export default AudioRecorder;
+export default RecordingState;

@@ -309,6 +309,14 @@ def get_session_status(session_id: str, poll: bool = False):
     if session_data.get("error"):
         response["error"] = session_data["error"]
     
+    # Include audio URL for frontend playback
+    if session_data.get("audio_url"):
+        # Convert the public URL to local path
+        audio_url = session_data["audio_url"]
+        if "/files/" in audio_url:
+            filename = audio_url.split("/files/")[-1]
+            response["audio_url"] = f"/files/{filename}"
+    
     return response
 
 def format_transcript(result_data: dict, doctor_speaker: str = None) -> dict:

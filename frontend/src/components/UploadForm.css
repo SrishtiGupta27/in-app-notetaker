@@ -2,28 +2,55 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
+  width: 100%;
+  height: 100%;
+  min-height: 80vh;
+  padding: 2rem;
 }
 
 .upload-card {
-  background: white;
-  border-radius: 12px;
-  padding: 2.5rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 
+    0 25px 50px rgba(0, 77, 77, 0.25),
+    0 15px 30px rgba(32, 178, 170, 0.15),
+    0 5px 15px rgba(70, 130, 180, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3);
   max-width: 500px;
   width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+.upload-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.upload-icon {
+  color: #1A73E8;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
 }
 
 .upload-card h2 {
-  color: #1a5276;
+  color: #1f2937;
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .upload-subtitle {
-  color: #7f8c8d;
+  color: #6b7280;
   font-size: 0.9rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
+  line-height: 1.5;
 }
 
 .upload-form {
@@ -37,40 +64,159 @@
 }
 
 .file-label {
-  display: block;
-  padding: 1rem;
-  background: #ecf0f1;
-  border: 2px dashed #bdc3c7;
-  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
-  color: #2c3e50;
+  color: #374151;
+  font-weight: 500;
 }
 
 .file-label:hover {
-  background: #d5dbdb;
-  border-color: #95a5a6;
+  background: #f3f4f6;
+  border-color: #1A73E8;
+  color: #1A73E8;
+}
+
+.upload-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.upload-divider::before,
+.upload-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.upload-divider span {
+  padding: 0 1rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.btn-record-new {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-record-new:hover {
+  background: #1A73E8;
+  color: white;
+  border-color: #1A73E8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+.btn-record-new:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 1.25rem;
+  background: #1A73E8;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1557b0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .error-message {
-  background: #fadbd8;
-  color: #c0392b;
-  padding: 0.75rem;
-  border-radius: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
   font-size: 0.9rem;
+  border: 1px solid #fecaca;
 }
 
 .info-box {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: #ebf5fb;
-  border-left: 4px solid #1a5276;
-  border-radius: 4px;
+  background: #f0f9ff;
+  border-left: 4px solid #1A73E8;
+  border-radius: 8px;
   font-size: 0.85rem;
-  color: #2c3e50;
+  color: #374151;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.info-box svg {
+  color: #1A73E8;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
 }
 
 .info-box strong {
-  color: #1a5276;
+  color: #1A73E8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .upload-form-container {
+    padding: 1rem;
+  }
+  
+  .upload-card {
+    padding: 2rem;
+  }
 }
