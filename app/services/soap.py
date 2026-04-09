@@ -52,7 +52,7 @@ def generate_soap_note(segments: List[Dict]) -> Dict:
         return {"error": "Empty transcript, cannot generate clinical note"}
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[
             {
                 "role": "user",
